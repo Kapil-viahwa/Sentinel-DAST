@@ -199,7 +199,7 @@ export default function NewScan() {
                 </Field>
                 <Field label="Authorized by (authorizer name/contact)"><Input value={authorizedBy} onChange={(e) => setAuthorizedBy(e.target.value)} /></Field>
                 <Field label="Authorization reference (ticket, contract)"><Input value={authorizationRef} onChange={(e) => setAuthorizationRef(e.target.value)} /></Field>
-                <Field label="Authorization confirmation statement" hint="Record the exact written authorization. You will re-enter it verbatim to launch scans.">
+                <Field label="Authorization confirmation statement" hint="Record the exact written authorization (minimum 20 characters — e.g. 'I, <name>, own this application and authorize security scanning of it.'). You will re-enter it verbatim to launch scans.">
                   <textarea
                     className="w-full rounded border border-slate-300 px-3 py-1.5 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
                     rows={3}
