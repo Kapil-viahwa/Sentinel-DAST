@@ -1,0 +1,66 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-sentinel}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sentinel}
+      POSTGRES_DB: ${POSTGRES_DB:-sentinel}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-sentinel}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+
+  backend:
+    build: ./backend
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+psycopg2://$${POSTGRES_USER:-sentinel}:$${POSTGRES_PASSWORD:-sentinel}@db:5432/$${POSTGRES_DB:-sentinel}
+      REDIS_URL: redis://redis:6379/0
+      OBJECT_STORAGE_DIR: /data/reports
+    volumes:
+      - report_data:/data
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  worker:
+    build: ./backend
+    command: celery -A app.engine.worker.celery_app worker -Q scans -c 2 --loglevel=info
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+psycopg2://$${POSTGRES_USER:-sentinel}:$${POSTGRES_PASSWORD:-sentinel}@db:5432/$${POSTGRES_DB:-sentinel}
+      REDIS_URL: redis://redis:6379/0
+      OBJECT_STORAGE_DIR: /data/reports
+    volumes:
+      - report_data:/data
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  frontend:
+    build: ./frontend
+    environment:
+      VITE_API_BASE: http://localhost:8000
+    ports:
+      - "4173:4173"
+    depends_on:
+      - backend
+
+volumes:
+  db_data:
+  redis_data:
+  report_data:
