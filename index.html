@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sentinel DAST — UI Preview</title>
+<style>
+  :root {
+    --bg: #0f172a; --panel: #1e293b; --panel2: #273449; --border: #334155;
+    --text: #e2e8f0; --muted: #94a3b8; --accent: #2563eb; --accent2: #3b82f6;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font: 14px/1.5 -apple-system, "Segoe UI", Roboto, sans-serif; }
+  a { color: var(--accent2); text-decoration: none; }
+
+  .banner { background: #7c2d12; color: #fed7aa; padding: 8px 16px; font-size: 12.5px; text-align: center; }
+  .banner b { color: #fff; }
+
+  .app { display: flex; min-height: 100vh; }
+  .sidebar { width: 210px; background: var(--panel); border-right: 1px solid var(--border); padding: 16px 12px; flex-shrink: 0; }
+  .logo { font-weight: 700; font-size: 16px; margin-bottom: 20px; padding: 0 8px; }
+  .logo span { color: var(--accent2); }
+  .nav a { display: block; padding: 8px 10px; border-radius: 6px; color: var(--muted); margin-bottom: 2px; cursor: pointer; }
+  .nav a:hover { background: var(--panel2); color: var(--text); }
+  .nav a.active { background: var(--accent); color: #fff; }
+  .theme-toggle { margin-top: 24px; background: none; border: none; color: var(--muted); cursor: pointer; font-size: 12px; padding: 8px 10px; }
+
+  main { flex: 1; padding: 20px 28px; overflow: auto; }
+  h1 { font-size: 20px; margin-bottom: 16px; }
+  h2 { font-size: 15px; margin-bottom: 10px; }
+  .top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+  .user { color: var(--muted); font-size: 13px; }
+
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 18px; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+  .card .label { font-size: 11px; text-transform: uppercase; letter-spacing: .4px; color: var(--muted); }
+  .card .value { font-size: 24px; font-weight: 700; margin-top: 4px; }
+  .card .sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 900px) { .grid2 { grid-template-columns: 1fr; } .sidebar { width: 64px; } .sidebar .label-text, .logo span.full { display: none; } }
+
+  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; }
+  .panel > h2 { padding: 10px 14px; border-bottom: 1px solid var(--border); }
+  .panel .body { padding: 14px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; font-size: 11px; text-transform: uppercase; color: var(--muted); padding: 8px 10px; border-bottom: 1px solid var(--border); }
+  td { padding: 8px 10px; border-bottom: 1px solid var(--border); color: var(--text); }
+  tr:last-child td { border-bottom: none; }
+  .mono { font-family: ui-monospace, Menlo, monospace; font-size: 12px; color: var(--muted); }
+
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+  .b-critical { background: #7f1d1d; color: #fff; }
+  .b-high { background: #dc2626; color: #fff; }
+  .b-medium { background: #d97706; color: #fff; }
+  .b-low { background: #2563eb; color: #fff; }
+  .b-info { background: #64748b; color: #fff; }
+  .b-green { background: #16a34a; color: #fff; }
+  .b-slate { background: #475569; color: #e2e8f0; }
+
+  .bar { height: 10px; border-radius: 5px; background: var(--panel2); flex: 1; overflow: hidden; }
+  .bar i { display: block; height: 100%; }
+
+  .row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 13px; }
+  .row .name { width: 110px; color: var(--muted); text-transform: capitalize; }
+  .row .count { width: 30px; text-align: right; }
+
+  .stepper { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .step { border-radius: 14px; padding: 4px 12px; font-size: 12px; background: var(--panel2); color: var(--muted); }
+  .step.on { background: var(--accent); color: #fff; }
+  .field { margin-bottom: 12px; }
+  .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  .field input, .field select, .field textarea { width: 100%; background: var(--panel2); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; font-size: 13px; }
+  .btn { display: inline-block; background: var(--accent); color: #fff; border: none; border-radius: 6px; padding: 8px 16px; font-size: 13px; cursor: pointer; }
+  .btn.secondary { background: var(--panel2); color: var(--text); border: 1px solid var(--border); }
+  .hint { font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+  .view { display: none; }
+  .view.on { display: block; }
+  .empty { border: 1px dashed var(--border); border-radius: 8px; padding: 28px; text-align: center; color: var(--muted); font-size: 13px; }
+  .evidence { background: #0b1120; border: 1px solid var(--border); border-radius: 6px; padding: 10px; font-family: ui-monospace, Menlo, monospace; font-size: 11.5px; white-space: pre-wrap; color: #9fb3c8; margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="banner">
+  <b>Static UI preview with sample data.</b> The real platform — FastAPI backend, PostgreSQL, Redis, Celery scan engine — runs with <b>docker compose up --build</b>. Nothing here scans anything.
+</div>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="logo">Sentinel <span class="full">DAST</span></div>
+    <nav class="nav" id="nav">
+      <a data-view="dashboard" class="active">📈 <span class="label-text">Dashboard</span></a>
+      <a data-view="applications">🗂 <span class="label-text">Applications</span></a>
+      <a data-view="wizard">🚀 <span class="label-text">New scan</span></a>
+      <a data-view="scans">⚙ <span class="label-text">Scans</span></a>
+      <a data-view="findings">🛡 <span class="label-text">Findings</span></a>
+      <a data-view="settings">🔧 <span class="label-text">Settings</span></a>
+    </nav>
+    <button class="theme-toggle" onclick="alert('Dark mode is the default in the preview; the React app has a full light/dark toggle.')">◐ <span class="label-text">Theme</span></button>
+  </aside>
+
+  <main>
+    <div class="top">
+      <span class="user">analyst@lab.local · <b>admin</b> · Org: Demo Lab</span>
+      <span class="user mono">UI preview</span>
+    </div>
+
+    <!-- ============ DASHBOARD ============ -->
+    <section class="view on" id="view-dashboard">
+      <h1>Security Dashboard</h1>
+      <div class="cards">
+        <div class="card"><div class="label">Applications</div><div class="value">2</div></div>
+        <div class="card"><div class="label">Active scans</div><div class="value">1</div></div>
+        <div class="card"><div class="label">Completed scans</div><div class="value">4</div></div>
+        <div class="card"><div class="label">Endpoints</div><div class="value">37</div></div>
+        <div class="card"><div class="label">Findings</div><div class="value">18</div></div>
+        <div class="card"><div class="label">Open / Closed</div><div class="value">14 / 4</div></div>
+        <div class="card"><div class="label">Confirmed</div><div class="value">11</div><div class="sub">evidence observed or validated</div></div>
+        <div class="card"><div class="label">Suspected</div><div class="value">5</div><div class="sub">require manual validation</div></div>
+        <div class="card"><div class="label">False-positive rate</div><div class="value">6%</div></div>
+        <div class="card"><div class="label">Avg. time to remediate</div><div class="value">9.4d</div></div>
+        <div class="card"><div class="label">Recurring apps</div><div class="value">1</div></div>
+      </div>
+
+      <div class="grid2">
+        <div class="panel"><h2>Findings by severity</h2><div class="body">
+          <div class="row"><span class="name">critical</span><div class="bar"><i style="width:100%;background:#7f1d1d"></i></div><span class="count">2</span></div>
+          <div class="row"><span class="name">high</span><div class="bar"><i style="width:70%;background:#dc2626"></i></div><span class="count">5</span></div>
+          <div class="row"><span class="name">medium</span><div class="bar"><i style="width:50%;background:#d97706"></i></div><span class="count">7</span></div>
+          <div class="row"><span class="name">low</span><div class="bar"><i style="width:28%;background:#2563eb"></i></div><span class="count">3</span></div>
+          <div class="row"><span class="name">informational</span><div class="bar"><i style="width:14%;background:#64748b"></i></div><span class="count">1</span></div>
+        </div></div>
+        <div class="panel"><h2>Findings by OWASP Top 10:2025 category</h2><div class="body">
+          <table>
+            <tr><td>A01:2025 — Broken Access Control</td><td><b>4</b></td></tr>
+            <tr><td>A02:2025 — Security Misconfiguration</td><td><b>6</b></td></tr>
+            <tr><td>A03:2025 — Software Supply Chain Failures</td><td><b>1</b></td></tr>
+            <tr><td>A04:2025 — Cryptographic Failures</td><td><b>2</b></td></tr>
+            <tr><td>A05:2025 — Injection</td><td><b>4</b></td></tr>
+            <tr><td>A07:2025 — Authentication Failures</td><td><b>1</b></td></tr>
+          </table>
+        </div></div>
+        <div class="panel"><h2>Vulnerability aging (open)</h2><div class="body">
+          <div class="row"><span class="name">0-7d</span><div class="bar"><i style="width:64%;background:#16a34a"></i></div><span class="count">9</span></div>
+          <div class="row"><span class="name">8-30d</span><div class="bar"><i style="width:36%;background:#d97706"></i></div><span class="count">5</span></div>
+          <div class="row"><span class="name">31-90d</span><div class="bar"><i style="width:14%;background:#dc2626"></i></div><span class="count">2</span></div>
+        </div></div>
+        <div class="panel"><h2>Latest scan activity</h2><div class="body">
+          <table>
+            <tr><td class="mono">9f3ac2e1</td><td>completed · finalize · 212 requests · 19 endpoints</td></tr>
+            <tr><td class="mono">b81d04aa</td><td>running · active · 96 requests · 19 endpoints</td></tr>
+            <tr><td class="mono">77c0e513</td><td>completed · finalize · 154 requests · 17 endpoints</td></tr>
+            <tr><td class="mono">12ab90fd</td><td>cancelled · done · 23 requests · 9 endpoints</td></tr>
+          </table>
+        </div></div>
+      </div>
+    </section>
+
+    <!-- ============ APPLICATIONS ============ -->
+    <section class="view" id="view-applications">
+      <h1>Applications</h1>
+      <div class="grid2">
+        <div class="panel"><div class="body">
+          <div style="display:flex;justify-content:space-between"><b>Demo Store</b> <span class="badge b-slate">development</span></div>
+          <p class="mono" style="margin:6px 0">http://127.0.0.1:8001</p>
+          <p class="hint">Approved hosts: base URL only · Excluded paths: none</p>
+          <p class="hint"><a>New scan</a> · <a>Scan history</a></p>
+        </div></div>
+        <div class="panel"><div class="body">
+          <div style="display:flex;justify-content:space-between"><b>Payments API (staging)</b> <span class="badge b-slate">staging</span></div>
+          <p class="mono" style="margin:6px 0">https://api-staging.example.com</p>
+          <p class="hint">Approved hosts: *.example.com · Excluded paths: /admin, /users/delete</p>
+          <p class="hint"><a>New scan</a> · <a>Scan history</a></p>
+        </div></div>
+      </div>
+    </section>
+
+    <!-- ============ WIZARD ============ -->
+    <section class="view" id="view-wizard">
+      <h1>New scan</h1>
+      <div class="stepper">
+        <span class="step on">1. Target</span><span class="step">2. Authentication</span>
+        <span class="step">3. Crawl</span><span class="step">4. Profile</span><span class="step">5. Review &amp; launch</span>
+      </div>
+      <div class="panel"><div class="body" style="max-width:560px">
+        <div class="field"><label>Application</label>
+          <select><option>Register a new application…</option><option>Demo Store</option><option>Payments API (staging)</option></select></div>
+        <div class="field"><label>Base URL</label><input value="https://staging.example.com"></div>
+        <div class="field"><label>Environment</label>
+          <select><option>development</option><option>qa</option><option selected>staging</option><option>production</option></select></div>
+        <div class="field"><label>Additional approved hosts</label><input placeholder="*.example.com"></div>
+        <div class="field"><label>Excluded paths</label><input placeholder="/logout, /admin/users/delete"></div>
+        <div class="field"><label>Authorization confirmation statement</label>
+          <textarea rows="3" placeholder="Record the exact written authorization — scans are refused without an exact match"></textarea></div>
+        <span class="btn">Continue</span>
+        <p class="hint">The backend validates scheme, host allowlist, path rules and DNS resolution (private/loopback/metadata addresses refused) before a scan can be created.</p>
+      </div></div>
+    </section>
+
+    <!-- ============ SCANS ============ -->
+    <section class="view" id="view-scans">
+      <h1>Scans</h1>
+      <div class="panel">
+        <table>
+          <tr><th>Scan</th><th>Status</th><th>Phase</th><th>Requests</th><th>Endpoints</th><th>Tests</th><th>Type</th></tr>
+          <tr><td class="mono">9f3ac2e1</td><td><span class="badge b-green">completed</span></td><td>finalize</td><td>212</td><td>19</td><td>64</td><td>scan</td></tr>
+          <tr><td class="mono">b81d04aa</td><td><span class="badge b-low">running</span></td><td>active</td><td>96</td><td>19</td><td>31</td><td>retest</td></tr>
+          <tr><td class="mono">77c0e513</td><td><span class="badge b-green">completed</span></td><td>finalize</td><td>154</td><td>17</td><td>52</td><td>scan</td></tr>
+          <tr><td class="mono">12ab90fd</td><td><span class="badge b-slate">cancelled</span></td><td>done</td><td>23</td><td>9</td><td>6</td><td>scan</td></tr>
+        </table>
+      </div>
+      <p class="hint">In the real app this view streams live progress over SSE with pause / resume / cancel controls.</p>
+    </section>
+
+    <!-- ============ FINDINGS ============ -->
+    <section class="view" id="view-findings">
+      <h1>Findings</h1>
+      <div class="panel">
+        <table>
+          <tr><th>Severity</th><th>Title</th><th>OWASP</th><th>Verification</th><th>Status</th></tr>
+          <tr><td><span class="badge b-critical">critical</span></td><td>Path traversal read of /etc/passwd via parameter 'path'</td><td>A05:2025 — Injection</td><td>evidence_observed</td><td>open</td></tr>
+          <tr><td><span class="badge b-critical">critical</span></td><td>Exposed .env configuration file</td><td>A02:2025 — Misconfiguration</td><td>evidence_observed</td><td>open</td></tr>
+          <tr><td><span class="badge b-high">high</span></td><td>Reflected XSS in parameter 'q'</td><td>A05:2025 — Injection</td><td>evidence_observed</td><td>open</td></tr>
+          <tr><td><span class="badge b-high">high</span></td><td>Exposed .git repository (source disclosure)</td><td>A02:2025 — Misconfiguration</td><td>evidence_observed</td><td>open</td></tr>
+          <tr><td><span class="badge b-high">high</span></td><td>SQL error disclosure on parameter 'q'</td><td>A05:2025 — Injection</td><td>evidence_observed</td><td>confirmed</td></tr>
+          <tr><td><span class="badge b-medium">medium</span></td><td>Missing Content-Security-Policy header</td><td>A02:2025 — Misconfiguration</td><td>evidence_observed</td><td>open</td></tr>
+          <tr><td><span class="badge b-medium">medium</span></td><td>Open redirect via parameter 'next'</td><td>A01:2025 — Broken Access Control</td><td>evidence_observed</td><td>open</td></tr>
+        </table>
+      </div>
+
+      <div class="panel" style="margin-top:14px"><h2>Finding detail — Reflected XSS in parameter 'q'</h2><div class="body">
+        <p style="font-size:13px;color:var(--muted)">A05:2025 — Injection · CWE-79 · confidence firm · <span class="badge b-high">evidence_observed</span></p>
+        <p style="margin:8px 0" class="mono">GET /search?q="&gt;&lt;svg/onload=document.title=1&gt;SENTXSS48213&lt;</p>
+        <p style="font-size:13px;margin:8px 0">The value of parameter 'q' is reflected into the HTML response without context-appropriate encoding, allowing script injection. Execution was not verified in a browser context — Playwright is not configured.</p>
+        <div class="evidence">{
+  "request":  { "url": "/search?q=%22%3E%3Csvg/onload%3D...%3E", "method": "GET" },
+  "mutated":  { "status": 200, "modification": "param 'q' = XSS payload" },
+  "difference": { "similarity": 0.41, "diff_sample": ["+Results", "+for", "+query:", "+\"&gt;&lt;svg..."] }
+}</div>
+        <p class="hint">Evidence is stored with secrets redacted; analysts can override status/severity with a mandatory rationale that is written to the audit log.</p>
+      </div></div>
+    </section>
+
+    <!-- ============ SETTINGS ============ -->
+    <section class="view" id="view-settings">
+      <h1>Settings</h1>
+      <div class="panel"><h2>Integrations — honest states</h2><div class="body">
+        <div class="card" style="margin-bottom:10px"><b>owasp-zap — unconfigured</b>
+          <p class="hint">ZAP_API_URL is not set; the adapter is defined but the integration has not been implemented or tested. Scans use the sentinel-native engine only.</p></div>
+        <div class="card" style="margin-bottom:10px"><b>playwright-browser-crawler — unconfigured</b>
+          <p class="hint">Install <span class="mono">playwright</span> and run <span class="mono">playwright install chromium</span> to enable browser crawling and DOM XSS execution checks.</p></div>
+        <div class="card"><b>Global kill switch</b>
+          <p class="hint">Immediately stops all scan requests across all workers — checked between every request. Admin-only.</p>
+          <p><span class="btn secondary" style="margin-top:8px">Engage kill switch</span></p></div>
+      </div></div>
+    </section>
+  </main>
+</div>
+
+<script>
+  const links = document.querySelectorAll('#nav a');
+  links.forEach(link => link.addEventListener('click', () => {
+    links.forEach(l => l.classList.remove('active'));
+    link.classList.add('active');
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('on'));
+    document.getElementById('view-' + link.dataset.view).classList.add('on');
+    window.scrollTo(0, 0);
+  }));
+</script>
+</body>
+</html>

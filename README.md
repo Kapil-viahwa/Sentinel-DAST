@@ -38,6 +38,10 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) and [docs/THREAT_MODEL.md](docs
 
 ## Quick start (Docker Compose)
 
+See the full [Installation & Setup Guide](docs/SETUP.md) for prerequisites, manual
+(dev) installation, configuration reference, the first-scan walkthrough and
+troubleshooting.
+
 ```bash
 cp .env.example .env        # set SECRET_KEY and DB password
 docker compose up --build
