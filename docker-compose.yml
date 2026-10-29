@@ -22,7 +22,9 @@ services:
     build: ./backend
     env_file: .env
     environment:
-      DATABASE_URL: postgresql+psycopg2://$${POSTGRES_USER:-sentinel}:$${POSTGRES_PASSWORD:-sentinel}@db:5432/$${POSTGRES_DB:-sentinel}
+      # Compose interpolates these from .env at up time (single $ = compose-level
+      # substitution). The db container is initialized with the same values.
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-sentinel}:${POSTGRES_PASSWORD:-sentinel}@db:5432/${POSTGRES_DB:-sentinel}
       REDIS_URL: redis://redis:6379/0
       OBJECT_STORAGE_DIR: /data/reports
     volumes:
@@ -40,7 +42,7 @@ services:
     command: celery -A app.engine.worker.celery_app worker -Q scans -c 2 --loglevel=info
     env_file: .env
     environment:
-      DATABASE_URL: postgresql+psycopg2://$${POSTGRES_USER:-sentinel}:$${POSTGRES_PASSWORD:-sentinel}@db:5432/$${POSTGRES_DB:-sentinel}
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-sentinel}:${POSTGRES_PASSWORD:-sentinel}@db:5432/${POSTGRES_DB:-sentinel}
       REDIS_URL: redis://redis:6379/0
       OBJECT_STORAGE_DIR: /data/reports
     volumes:
