@@ -245,4 +245,5 @@ exposed `/.git`/`/.env`/backup listing, verbose errors and missing security head
 | 403 creating a scan | authorization confirmation text doesn't exactly match the recorded statement |
 | 401 after a while | JWT expired — sign in again (`ACCESS_TOKEN_EXPIRE_MINUTES`) |
 | Frontend shows a blank page or API errors | `VITE_API_BASE` was baked in wrong — rebuild the frontend with the correct value |
+| Frontend shows "Not Found" or "Cannot reach the Sentinel API" | The frontend is not pointing at the backend. Start the frontend with `VITE_API_BASE=http://localhost:8000 npm run dev` (or rebuild: `VITE_API_BASE=http://localhost:8000 npm run build`). Verify the API answers: `curl http://localhost:8000/api/health` |
 | Login says "Too many login attempts" | 10 failures / 5 min / IP triggers Redis rate limiting; wait 5 minutes |
