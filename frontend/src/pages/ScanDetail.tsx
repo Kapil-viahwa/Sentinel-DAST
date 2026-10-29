@@ -67,8 +67,13 @@ export default function ScanDetail() {
   const control = async (action: 'cancel' | 'pause' | 'resume') => {
     if (!id) return
     try {
-      await api.post(`/api/scans/${id}/${action}`)
-    } catch { /* error surfaced via SSE error_message */ }
+      const updated = await api.post<{ status: string; phase: string; error_message: string | null }>(
+        `/api/scans/${id}/${action}`)
+      // reflect the change immediately instead of waiting for the next SSE tick
+      setLive((prev) => prev && { ...prev, status: updated.status, phase: updated.phase,
+                                  error_message: updated.error_message })
+      refreshLists(showAttackOnly)
+    } catch { /* errors also surface via the SSE error_message field */ }
   }
 
   if (!live) return <p className="text-slate-500">Loading scan…</p>

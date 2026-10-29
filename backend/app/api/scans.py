@@ -160,12 +160,15 @@ def cancel_scan(scan_id: str, user: models.User = Depends(require_role("admin", 
         get_redis().set(f"sentinel:scan:{scan.id}:cancel", "1")
         signal = "redis"
     except Exception:
-        # Without Redis there is no coordination channel to a running worker.
-        # If the scan has not started it can be cancelled directly.
         signal = "unavailable"
-        if scan.status in ("pending", "queued"):
-            scan.status = "cancelled"
-            scan.finished_at = models.now()
+    # A scan that has not started (pending/queued) may have no worker holding it —
+    # e.g. its task already failed in an earlier worker. Cancel it directly; the
+    # redis flag above also covers any late task redelivery (acks_late), and the
+    # pipeline refuses to run scans that are no longer pending/queued.
+    if scan.status in ("pending", "queued"):
+        scan.status = "cancelled"
+        scan.phase = "done"
+        scan.finished_at = models.now()
     scan.progress = dict(scan.progress or {}) | {"cancel_signal": signal}
     record_audit(db, user, "scan.cancel", "scan", scan.id, {"signal": signal})
     db.commit()
