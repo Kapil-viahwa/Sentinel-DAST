@@ -322,6 +322,7 @@ class ScanPipeline:
                     cvss_vector=draft.cvss_vector, cvss_score=draft.cvss_score,
                 )
                 db.add(finding)
+                db.flush()  # materialize the generated finding ID before storing evidence
                 ev = draft.evidence or {}
                 db.add(Evidence(
                     finding_id=finding.id,
