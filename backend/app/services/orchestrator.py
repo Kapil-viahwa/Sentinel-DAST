@@ -18,7 +18,7 @@ def enqueue_scan(scan_id: str) -> str:
 
     try:
         from ..engine.worker import celery_app
-        celery_app.send_task("sentinel.run_scan", args=[scan_id])
+        celery_app.send_task("sentinel.run_scan", args=[scan_id], queue="scans")
         return "celery"
     except Exception:
         threading.Thread(target=run_scan, args=(scan_id,), daemon=True).start()
