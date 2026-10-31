@@ -101,6 +101,11 @@ def test_retest_reconciles_findings(client, auth_headers, demo_server, no_enqueu
     retest_id = r.json()["id"]
     run_scan(retest_id)
 
+    retest = client.get(f"/api/scans/{retest_id}", headers=auth_headers).json()
+    assert retest["endpoints_discovered"] > 0
+    endpoints = client.get(f"/api/scans/{retest_id}/endpoints", headers=auth_headers).json()
+    assert endpoints["total"] > 0
+
     # dedup: a second scan of the same target must not duplicate findings
     count_after = len(client.get(f"/api/findings?application_id={app_id}",
                                  headers=auth_headers).json())

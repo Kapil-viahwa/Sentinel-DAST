@@ -162,7 +162,7 @@ class ScanPipeline:
 
             # --------------------------------------------------- endpoint rows
             seen = {(e.url, e.method) for e in
-                    db.query(Endpoint).filter_by(application_id=app.id).all()}
+                    db.query(Endpoint).filter_by(scan_id=self.scan_id).all()}
 
             def add_endpoint(url: str, method: str = "GET", params: list | None = None) -> Endpoint | None:
                 if (url, method) in seen:
